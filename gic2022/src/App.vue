@@ -11,7 +11,7 @@
                 <!-- It will update the content automatically when data is changed. It is called data reactive -->
                 <span v-show="isVisible" id="operand1">{{ inputNumber }}</span>
                 <span v-show="isHidden" id="operator">{{ operation }}</span>
-                <span v-show="isHidden" id="operand2">{{ temporary }}</span>
+                <span v-show="isHidden" id="operand2">{{ operand2 }}</span>
               </div>
               <!-- <span id="screen_bottom">0</span> -->
             </div>
@@ -113,118 +113,113 @@ export default {
   data() {
     return {
       // This is the private data section which can be used inside this component
-      isVisible: true,
-      isHidden: false,
-      inputNumber: 0,
-      memory: 0,
-      numSign: 0,
-      sign: '+',
-      memTemporary: 0,
-      temporary: null,
-      operation: '',
+      isVisible: true, // For showing first operand and also the output
+      isHidden: false, // Hide the operation since there is no operation yet
+      inputNumber: 0, // First operand
+      memory: 0, // Value store in memory
+      sign: '+', // For pos or neg value by default it is positive 
+      operand2: null, // Second operand
+      operation: '', // Operation for 2 operands
     };
   },
   methods: {
     showNumber(number) {
       // Assign number when user click to the inputNumber data
       // To access private data from methods, use (this.)
-      if(this.operation == '') {
+      if(this.operation == '') { // If there is no operation yet display on the first operand
         this.inputNumber = (this.inputNumber*10) + number;
         console.log("Operand1: "+this.inputNumber);
       }
-      else{
-        this.temporary = (this.temporary*10) +number;
-        console.log("Operand2: "+this.temporary);
+      else{ // Operation detected meaning there exist second operand
+        this.operand2 = (this.operand2*10) +number;
+        console.log("Operand2: "+this.operand2);
       }
     },
-    memoryRecall(){
-      if(this.operation == '') {
+    memoryRecall(){ // MR
+      if(this.operation == '') { // If no operation get memory to display as first operand
         this.inputNumber = this.memory;
       }
-      else{
-        this.temporary = this.memory;
+      else{ // Get memory to display as second operand
+        this.operand2 = this.memory;
       }
     },
-    memoryOperation(op){
-      if(op == '+') {
-        this.memTemporary += this.inputNumber;
+    memoryOperation(op){ // M+ or M-
+      if(op == '+') { // M+ Increase number input by memory value
+        this.memory += this.inputNumber;
       }
-      else if(op == '-') {
-        this.memTemporary -= this.inputNumber;
+      else if(op == '-') { // M- Decrease number input by memory value
+        this.memory -= this.inputNumber;
       }
-      this.memory = this.memTemporary;
       console.log("Memory operation: "+op);
+      console.log("Memory value: "+this.memory);
     },
-    memoryClear(){
+    memoryClear(){ // MC clearing value from memory (make it default value = 0)
       this.memory = 0;
     },
-    PosOrNeg(){
-      if(this.sign == '+') {
+    PosOrNeg(){ // Sign value or not (+/-)
+      if(this.sign == '+') { // If value has sign(+) then change to sign(-) when triggered
         this.sign = '-';
-        if(this.operation == '') {
-          this.inputNumber = -1 * this.inputNumber;
+        if(this.operation == '') { // Change first operand to negative value
+          this.inputNumber = -this.inputNumber;
         }
-        else{
-          this.temporary = -1 * this.temporary;
+        else{ // Change second operand to negative value
+          this.operand2 = -this.operand2;
         }
-        this.numSign = 0;
       }
-      else if(this.sign == '-') {
+      else if(this.sign == '-') { // If value has sign(-) change to opposite sign when trigger
         this.sign = '+';
-        if(this.operation == '') {
+        if(this.operation == '') { // Making first operand become positive value 
           this.inputNumber = Math.abs(this.inputNumber);
         }
-        else{
-          this.temporary = Math.abs(this.temporary);
+        else{ // Second operand become negative value
+          this.operand2 = Math.abs(this.operand2);
         }
       }
     },
-
-    clearNum() {
-      this.isHidden = false;
-      if(this.operation == '') {
+    clearNum() { // C clear number
+      this.isHidden = false; // Hide operation and second operand
+      if(this.operation == '') { // If there is no operation clear the first operand
         this.inputNumber = 0;
         console.log("Clear operand1");
       }
-      else{
-        this.temporary = null;
+      else{ // If there exist any operations clear the second operand
+        this.operand2 = null;
         console.log("Clear operand2");
       }
-      this.operation = '';
-      this.sign = '+';
+      this.operation = ''; // Clear operation after clearing any operand
+      this.sign = '+'; // After clearing operand number should be positive
     },
-    clearAll() {
-      this.isHidden = false;
+    clearAll() { // Clear everything (except memory)
+      this.isHidden = false; // Hide operation and second operand
       this.inputNumber = 0;
-      this.temporary = null;
+      this.operand2 = null;
       this.operation = '';
       this.sign = '+';
       console.log("Clear all numbers");
     },
-    changeOperation(op) {
+    changeOperation(op) { // Display operation when operation button is triggered
       this.isHidden = true;
       this.operation = op;
       console.log("Operation used: "+this.operation);
     },
-    calculateResult() {
-      // this.temporary = this.inputNumber;
-      this.isHidden = false;
+    calculateResult() { // = Show result of the operation
+      this.isHidden = false; // Hide operation and second operand since first operand is the result
 
-      if(this.operation == '+') {
-        this.temporary = this.inputNumber + this.temporary;
+      if(this.operation == '+') { // Addition operation
+        this.inputNumber += this.operand2;
       }
-      else if(this.operation == '-'){
-        this.temporary = this.inputNumber - this.temporary;
+      else if(this.operation == '-'){ // Subtraction operation
+        this.inputNumber -= this.operand2;
       }
-      else if(this.operation == '*') {
-        this.temporary = this.inputNumber * this.temporary;
+      else if(this.operation == '*') { // Multiplication operation
+        this.inputNumber *= this.operand2;
       }
-      else if(this.operation == '/') {
-        this.temporary = this.inputNumber / this.temporary;
+      else if(this.operation == '/') { // Division operation
+        this.inputNumber /= this.operand2;
       }
-      this.inputNumber = this.temporary;
       console.log("Result is: "+this.inputNumber);
-      this.temporary = null;
+      this.operation = '';
+      this.operand2 = null;
     },
   },
 };
